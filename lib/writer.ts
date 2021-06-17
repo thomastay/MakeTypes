@@ -1,7 +1,7 @@
 abstract class Writer {
   private readonly _tab: string;
   private readonly _nl: string;
-  constructor (tab: string = "  ", newline = "\n") {
+  constructor(tab: string = "  ", newline = "\n") {
     this._tab = tab;
     this._nl = newline;
   }

@@ -5,15 +5,8 @@
   "main": "lib/index.js",
   "types": "lib/index",
   "scripts": {
-    "prepublish": "tsc",
     "generate:test": "node ./test/common/generateSamples.js",
-    "build:test": "tsc -p test/tsconfig.json",
-    "mocha": "mocha",
-    "istanbul": "istanbul cover ./test/common/generateSamples.js",
-    "coverage": "npm-run-all --serial prepublish istanbul",
-    "coveralls": "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
-    "travis": "npm-run-all --serial test coverage coveralls",
-    "test": "npm-run-all --serial prepublish generate:test build:test mocha"
+    "build:test": "tsc -p test/tsconfig.json"
   },
   "bin": {
     "make_types": "./index.js"
@@ -35,16 +28,10 @@
   },
   "homepage": "https://github.com/jvilk/MakeTypes#readme",
   "devDependencies": {
-    "@types/mocha": "^5.2.4",
-    "@types/node": "0.0.2",
-    "@types/yargs": "^6.3.3",
-    "coveralls": "^3.0.2",
-    "istanbul": "^1.0.0-alpha",
-    "mocha": "^5.2.0",
-    "npm-run-all": "^3.1.2",
-    "typescript": "^2.1.4"
+    "prettier": "^2.3.1",
+    "typescript": "^4"
   },
   "dependencies": {
-    "yargs": "^6.5.0"
+    "yargs": "^17"
   }
 }

@@ -1,4 +1,4 @@
-import {default as Emitter, emitProxyTypeCheck} from './emit';
+import { default as Emitter, emitProxyTypeCheck } from "./emit";
 
 export const enum BaseShape {
   BOTTOM,
@@ -8,21 +8,36 @@ export const enum BaseShape {
   BOOLEAN,
   NUMBER,
   COLLECTION,
-  ANY
+  ANY,
 }
 
-export type Shape = CBottomShape | CNullShape | CRecordShape | CStringShape | CBooleanShape | CNumberShape | CCollectionShape | CAnyShape;
+export type Shape =
+  | CBottomShape
+  | CNullShape
+  | CRecordShape
+  | CStringShape
+  | CBooleanShape
+  | CNumberShape
+  | CCollectionShape
+  | CAnyShape;
 
 export const enum ContextType {
   ENTITY,
-  FIELD
+  FIELD,
 }
 
 function pascalCase(n: string): string {
-  return n.split("_").map((s) => (s[0] ? s[0].toUpperCase() : "") + s.slice(1)).join("");
+  return n
+    .split("_")
+    .map((s) => (s[0] ? s[0].toUpperCase() : "") + s.slice(1))
+    .join("");
 }
 
-export function getReferencedRecordShapes(e: Emitter, s: Set<CRecordShape>, sh: Shape): void {
+export function getReferencedRecordShapes(
+  e: Emitter,
+  s: Set<CRecordShape>,
+  sh: Shape
+): void {
   switch (sh.type) {
     case BaseShape.RECORD:
       if (!s.has(sh)) {
@@ -34,7 +49,9 @@ export function getReferencedRecordShapes(e: Emitter, s: Set<CRecordShape>, sh: 
       getReferencedRecordShapes(e, s, sh.baseShape);
       break;
     case BaseShape.ANY:
-      sh.getDistilledShapes(e).forEach((sh) => getReferencedRecordShapes(e, s, sh));
+      sh.getDistilledShapes(e).forEach((sh) =>
+        getReferencedRecordShapes(e, s, sh)
+      );
       break;
   }
 }
@@ -300,12 +317,19 @@ export class CRecordShape {
   public readonly contexts: Context[];
 
   private _name: string | null = null;
-  private constructor(fields: Map<string, Shape>, nullable: boolean, contexts: Context[]) {
+  private constructor(
+    fields: Map<string, Shape>,
+    nullable: boolean,
+    contexts: Context[]
+  ) {
     // Assign a context to all fields.
     const fieldsWithContext = new Map<string, Shape>();
     fields.forEach((val, index) => {
       if (val.type === BaseShape.RECORD || val.type === BaseShape.COLLECTION) {
-        fieldsWithContext.set(index, val.addContext(new FieldContext(this, index)));
+        fieldsWithContext.set(
+          index,
+          val.addContext(new FieldContext(this, index))
+        );
       } else {
         fieldsWithContext.set(index, val);
       }
@@ -321,7 +345,12 @@ export class CRecordShape {
    * Construct a new record shape. Returns an existing, equivalent record shape
    * if applicable.
    */
-  public static Create(e: Emitter, fields: Map<string, Shape>, nullable: boolean, contexts: Context[] = []): CRecordShape {
+  public static Create(
+    e: Emitter,
+    fields: Map<string, Shape>,
+    nullable: boolean,
+    contexts: Context[] = []
+  ): CRecordShape {
     const record = new CRecordShape(fields, nullable, contexts);
     return e.registerRecordShape(record);
   }
@@ -355,7 +384,11 @@ export class CRecordShape {
     }
   }
   public equal(t: Shape): boolean {
-    if (t.type === BaseShape.RECORD && this._nullable === t._nullable && this._fields.size === t._fields.size) {
+    if (
+      t.type === BaseShape.RECORD &&
+      this._nullable === t._nullable &&
+      this._fields.size === t._fields.size
+    ) {
       let rv = true;
       const tFields = t._fields;
       // Check all fields.
@@ -411,10 +444,16 @@ export class CRecordShape {
     this.forEachField((t, name) => {
       w.tab(1).writeln(`public readonly ${name}: ${t.getProxyType(e)};`);
     });
-    w.tab(1).writeln(`public static Parse(d: string): ${this.getProxyType(e)} {`);
+    w.tab(1).writeln(
+      `public static Parse(d: string): ${this.getProxyType(e)} {`
+    );
     w.tab(2).writeln(`return ${this.getProxyClass(e)}.Create(JSON.parse(d));`);
     w.tab(1).writeln(`}`);
-    w.tab(1).writeln(`public static Create(d: any, field: string = 'root'): ${this.getProxyType(e)} {`);
+    w.tab(1).writeln(
+      `public static Create(d: any, field: string = 'root'): ${this.getProxyType(
+        e
+      )} {`
+    );
     w.tab(2).writeln(`if (!field) {`);
     w.tab(3).writeln(`obj = d;`);
     w.tab(3).writeln(`field = "root";`);
@@ -424,14 +463,14 @@ export class CRecordShape {
     if (this.nullable) {
       w.writeln(`return null;`);
     } else {
-      e.markHelperAsUsed('throwNull2NonNull');
+      e.markHelperAsUsed("throwNull2NonNull");
       w.writeln(`throwNull2NonNull(field, d);`);
     }
     w.tab(2).writeln(`} else if (typeof(d) !== 'object') {`);
-    e.markHelperAsUsed('throwNotObject');
+    e.markHelperAsUsed("throwNotObject");
     w.tab(3).writeln(`throwNotObject(field, d, ${this.nullable});`);
-    w.tab(2).writeln(`} else if (Array.isArray(d)) {`)
-    e.markHelperAsUsed('throwIsArray');
+    w.tab(2).writeln(`} else if (Array.isArray(d)) {`);
+    e.markHelperAsUsed("throwIsArray");
     w.tab(3).writeln(`throwIsArray(field, d, ${this.nullable});`);
     w.tab(2).writeln(`}`);
     // At this point, we know we have a non-null object.
@@ -447,7 +486,7 @@ export class CRecordShape {
       w.tab(2).writeln(`this.${name} = d.${name};`);
     });
     w.tab(1).writeln(`}`);
-    w.writeln('}');
+    w.writeln("}");
   }
   public getReferencedRecordShapes(e: Emitter, rv: Set<CRecordShape>): void {
     this.forEachField((t, name) => {
@@ -458,7 +497,7 @@ export class CRecordShape {
     this._name = name;
   }
   public getName(e: Emitter): string {
-    if (typeof(this._name) === 'string') {
+    if (typeof this._name === "string") {
       return this._name;
     }
     // Calculate unique name.
@@ -488,7 +527,11 @@ export class CCollectionShape {
   private _name: string | null = null;
   constructor(baseShape: Shape, contexts: Context[] = []) {
     // Add context if a record/collection.
-    this.baseShape = (baseShape.type === BaseShape.RECORD || baseShape.type === BaseShape.COLLECTION) ? baseShape.addContext(new EntityContext(this)) : baseShape;
+    this.baseShape =
+      baseShape.type === BaseShape.RECORD ||
+      baseShape.type === BaseShape.COLLECTION
+        ? baseShape.addContext(new EntityContext(this))
+        : baseShape;
     this.contexts = contexts;
   }
 
@@ -522,7 +565,7 @@ export class CCollectionShape {
     return t.type === BaseShape.COLLECTION && this.baseShape.equal(t.baseShape);
   }
   public getName(e: Emitter): string {
-    if (typeof(this._name) === 'string') {
+    if (typeof this._name === "string") {
       return this._name;
     }
     const nameSet = new Set<string>();
@@ -605,12 +648,12 @@ export function d2s(e: Emitter, d: any): Shape {
   if (d === undefined || d === null) {
     return NullShape;
   }
-  switch (typeof(d)) {
-    case 'number':
+  switch (typeof d) {
+    case "number":
       return NumberShape;
-    case 'string':
+    case "string":
       return StringShape;
-    case 'boolean':
+    case "boolean":
       return BooleanShape;
   }
 
@@ -623,7 +666,6 @@ export function d2s(e: Emitter, d: any): Shape {
     let t: Shape = BottomShape;
     for (let i = 0; i < d.length; i++) {
       t = csh(e, t, d2s(e, d[i]));
-
     }
     return new CCollectionShape(t);
   }

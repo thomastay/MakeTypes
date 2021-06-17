@@ -1,22 +1,24 @@
 {
-    "compilerOptions": {
-        "module": "commonjs",
-        "target": "es5",
-        "noImplicitAny": true,
-        "noUnusedLocals": true,
-        "noEmitOnError": true,
-        "moduleResolution": "node",
-        "alwaysStrict": true,
-        "inlineSourceMap": true,
-        "strictNullChecks": true,
-        "lib": [
-            "es6", "es2015.collection"
-        ],
-        "declaration": true
-    },
-    "include": [
-        "index.ts",
-        "lib/**/*.ts",
-        "test/common/*.ts"
-    ]
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "lib": [
+      "ESNext",
+      "DOM"
+    ],
+    "moduleResolution": "Node",
+    "strict": true,
+    "sourceMap": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "noEmit": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true
+  },
+  "include": [
+    "index.ts",
+    "lib/**/*.ts",
+    "test/common/*.ts"
+  ]
 }
