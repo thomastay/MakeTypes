@@ -29,14 +29,14 @@ export const enum ContextType {
 function pascalCase(n: string): string {
   return n
     .split("_")
-    .map((s) => (s[0] ? s[0].toUpperCase() : "") + s.slice(1))
+    .map(s => (s[0] ? s[0].toUpperCase() : "") + s.slice(1))
     .join("");
 }
 
 export function getReferencedRecordShapes(
   e: Emitter,
   s: Set<CRecordShape>,
-  sh: Shape
+  sh: Shape,
 ): void {
   switch (sh.type) {
     case BaseShape.RECORD:
@@ -49,8 +49,8 @@ export function getReferencedRecordShapes(
       getReferencedRecordShapes(e, s, sh.baseShape);
       break;
     case BaseShape.ANY:
-      sh.getDistilledShapes(e).forEach((sh) =>
-        getReferencedRecordShapes(e, s, sh)
+      sh.getDistilledShapes(e).forEach(sh =>
+        getReferencedRecordShapes(e, s, sh),
       );
       break;
   }
@@ -66,7 +66,7 @@ export class FieldContext {
     this.parent = parent;
     this.field = field;
   }
-  public getName(e: Emitter): string {
+  public getName(_e: Emitter): string {
     const name = pascalCase(this.field);
     return name;
   }
@@ -100,10 +100,10 @@ export class CBottomShape {
   public makeNonNullable(): CBottomShape {
     return this;
   }
-  public emitType(e: Emitter): void {
+  public emitType(_e: Emitter): void {
     throw new Error(`Doesn't make sense.`);
   }
-  public getProxyType(e: Emitter): string {
+  public getProxyType(_e: Emitter): string {
     throw new Error(`Doesn't make sense.`);
   }
   public equal(t: Shape): boolean {
@@ -129,7 +129,7 @@ export class CNullShape {
   public emitType(e: Emitter): void {
     e.interfaces.write("null");
   }
-  public getProxyType(e: Emitter): string {
+  public getProxyType(_e: Emitter): string {
     return "null";
   }
   public equal(t: Shape): boolean {
@@ -155,7 +155,7 @@ export class CNumberShape {
   public emitType(e: Emitter): void {
     e.interfaces.write(this.getProxyType(e));
   }
-  public getProxyType(e: Emitter): string {
+  public getProxyType(_e: Emitter): string {
     let rv = "number";
     if (this.nullable) {
       rv += " | null";
@@ -186,7 +186,7 @@ export class CStringShape {
   public emitType(e: Emitter): void {
     e.interfaces.write(this.getProxyType(e));
   }
-  public getProxyType(e: Emitter): string {
+  public getProxyType(_e: Emitter): string {
     let rv = "string";
     if (this.nullable) {
       rv += " | null";
@@ -217,7 +217,7 @@ export class CBooleanShape {
   public emitType(e: Emitter): void {
     e.interfaces.write(this.getProxyType(e));
   }
-  public getProxyType(e: Emitter): string {
+  public getProxyType(_e: Emitter): string {
     let rv = "boolean";
     if (this.nullable) {
       rv += " | null";
@@ -271,7 +271,7 @@ export class CAnyShape {
         }
         shapes.get(s.type)!.push(s);
       }
-      shapes.forEach((shapes, key) => {
+      shapes.forEach((shapes, _key) => {
         let shape: Shape = BottomShape;
         for (let i = 0; i < shapes.length; i++) {
           shape = csh(e, shape, shapes[i]);
@@ -301,7 +301,7 @@ export class CAnyShape {
   }
   public getProxyType(e: Emitter): string {
     this._ensureDistilled(e);
-    return this._distilledShapes.map((s) => s.getProxyType(e)).join(" | ");
+    return this._distilledShapes.map(s => s.getProxyType(e)).join(" | ");
   }
   public equal(t: Shape): boolean {
     return this === t;
@@ -320,7 +320,7 @@ export class CRecordShape {
   private constructor(
     fields: Map<string, Shape>,
     nullable: boolean,
-    contexts: Context[]
+    contexts: Context[],
   ) {
     // Assign a context to all fields.
     const fieldsWithContext = new Map<string, Shape>();
@@ -328,7 +328,7 @@ export class CRecordShape {
       if (val.type === BaseShape.RECORD || val.type === BaseShape.COLLECTION) {
         fieldsWithContext.set(
           index,
-          val.addContext(new FieldContext(this, index))
+          val.addContext(new FieldContext(this, index)),
         );
       } else {
         fieldsWithContext.set(index, val);
@@ -349,7 +349,7 @@ export class CRecordShape {
     e: Emitter,
     fields: Map<string, Shape>,
     nullable: boolean,
-    contexts: Context[] = []
+    contexts: Context[] = [],
   ): CRecordShape {
     const record = new CRecordShape(fields, nullable, contexts);
     return e.registerRecordShape(record);
@@ -445,14 +445,14 @@ export class CRecordShape {
       w.tab(1).writeln(`public readonly ${name}: ${t.getProxyType(e)};`);
     });
     w.tab(1).writeln(
-      `public static Parse(d: string): ${this.getProxyType(e)} {`
+      `public static Parse(d: string): ${this.getProxyType(e)} {`,
     );
     w.tab(2).writeln(`return ${this.getProxyClass(e)}.Create(JSON.parse(d));`);
     w.tab(1).writeln(`}`);
     w.tab(1).writeln(
       `public static Create(d: any, field: string = 'root'): ${this.getProxyType(
-        e
-      )} {`
+        e,
+      )} {`,
     );
     w.tab(2).writeln(`if (!field) {`);
     w.tab(3).writeln(`obj = d;`);
@@ -482,14 +482,14 @@ export class CRecordShape {
     w.tab(1).writeln(`}`);
     w.tab(1).writeln(`private constructor(d: any) {`);
     // Emit an assignment for each field.
-    this.forEachField((t, name) => {
+    this.forEachField((_t, name) => {
       w.tab(2).writeln(`this.${name} = d.${name};`);
     });
     w.tab(1).writeln(`}`);
     w.writeln("}");
   }
   public getReferencedRecordShapes(e: Emitter, rv: Set<CRecordShape>): void {
-    this.forEachField((t, name) => {
+    this.forEachField((t, _name) => {
       getReferencedRecordShapes(e, rv, t);
     });
   }
@@ -503,9 +503,9 @@ export class CRecordShape {
     // Calculate unique name.
     const nameSet = new Set<string>();
     let name = this.contexts
-      .map((c) => c.getName(e))
+      .map(c => c.getName(e))
       // Remove duplicate names.
-      .filter((n) => {
+      .filter(n => {
         if (!nameSet.has(n)) {
           nameSet.add(n);
           return true;
@@ -571,8 +571,8 @@ export class CCollectionShape {
     const nameSet = new Set<string>();
     // No need to make collection names unique.
     this._name = this.contexts
-      .map((c) => c.getName(e))
-      .filter((name) => {
+      .map(c => c.getName(e))
+      .filter(name => {
         if (!nameSet.has(name)) {
           nameSet.add(name);
           return true;

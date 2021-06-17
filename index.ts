@@ -1,20 +1,24 @@
 #!/usr/bin/env node
-import * as yargs from 'yargs';
-import * as fs from 'fs';
-import * as path from 'path';
+const yargs = require("yargs");
+import * as fs from "fs";
+import * as path from "path";
 
-import {StreamWriter, NopWriter, Emitter} from './lib/index';
+import { StreamWriter, NopWriter, Emitter } from "./lib/index";
 
-const argv = yargs.usage('Usage: $0 [options] inputFile rootName')
-  .alias('i', 'interface-file')
-  .string('i')
-  .describe('i', 'Specify output file for interfaces')
-  .alias('p', 'proxy-file')
-  .string('p')
-  .describe('p', 'Specity output file for TypeScript proxy classes')
-  .help('h')
-  .alias('h', 'help')
-  .argv;
+const argv = yargs
+  .usage("Usage: $0 [options] inputFile rootName")
+  .option("interface-file", {
+    alias: "i",
+    string: true,
+    description: "Specify output file for interfaces",
+  })
+  .option("proxy-file", {
+    alias: "p",
+    string: true,
+    description: "Specify output file for Typescript proxy classes",
+  })
+  .help("h")
+  .alias("h", "help").argv;
 
 let interfaceWriter = new NopWriter();
 let proxyWriter = interfaceWriter;
@@ -30,7 +34,9 @@ if (argv.p) {
   proxyWriter = new StreamWriter(fs.createWriteStream(argv.p));
 }
 if (argv._.length !== 2) {
-  console.error(`Please supply an input file with samples in a JSON array, and a symbol to use for the root interface / proxy.`);
+  console.error(
+    `Please supply an input file with samples in a JSON array, and a symbol to use for the root interface / proxy.`,
+  );
   yargs.showHelp();
   process.exit(1);
 }

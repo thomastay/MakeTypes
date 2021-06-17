@@ -1,4 +1,6 @@
-import * as assert from 'assert';
+function assert(ctx: any, msg = "") {
+  throw new Error(ctx.toString() + msg);
+}
 
 export interface Proxy<T> {
   Parse(s: string): T;
@@ -23,12 +25,18 @@ class Context {
 }
 
 function equal(expected: any, actual: any, prop: string): Context {
-  if (expected === null || typeof(expected) !== "object") {
+  if (expected === null || typeof expected !== "object") {
     return new Context(expected !== actual, prop, `${expected} !== ${actual}`);
   }
   if (Array.isArray(expected)) {
-    const ctx = new Context(!Array.isArray(actual), prop, 'Expected an array.')
-      .or(() => actual.length !== expected.length, `Array lengths do not match.`);
+    const ctx = new Context(
+      !Array.isArray(actual),
+      prop,
+      "Expected an array.",
+    ).or(
+      () => actual.length !== expected.length,
+      `Array lengths do not match.`,
+    );
     if (!ctx.fail) {
       for (let i = 0; i < expected.length; i++) {
         const ctx = equal(expected[i], actual[i], `${prop}[${i}]`);
@@ -36,7 +44,7 @@ function equal(expected: any, actual: any, prop: string): Context {
           return ctx;
         }
       }
-      return new Context(false, prop, '');
+      return new Context(false, prop, "");
     } else {
       return ctx;
     }
@@ -49,13 +57,13 @@ function equal(expected: any, actual: any, prop: string): Context {
         return ctx;
       }
     }
-    return new Context(false, prop, '');
+    return new Context(false, prop, "");
   }
 }
 
 export function parseEquals<T>(proxy: Proxy<T>, s: string, expected: T): void {
   const d = proxy.Parse(s);
-  const ctx = equal(expected, d, 'root');
+  const ctx = equal(expected, d, "root");
   assert(!ctx.fail, `Property ${ctx.prop} does not match: ${ctx.msg}`);
 }
 
