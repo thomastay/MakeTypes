@@ -1,4 +1,4 @@
-*.js
+dist/
 *.d.ts
 node_modules
 /test/generated

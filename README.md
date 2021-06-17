@@ -1,4 +1,9 @@
+# This is my personal fork of Make Types. Use at your own risk.
+
+# Thomas Tay, 2021
+
 # MakeTypes 1.1.2
+
 > Generate TypeScript types and proxy classes from example JSON objects. Type check JSON objects at runtime!
 
 [![NPM version](https://badge.fury.io/js/maketypes.svg)](http://badge.fury.io/js/maketypes)
@@ -12,10 +17,9 @@ your program receives the data you expect. **All you need is a file containing r
 
 Features:
 
-* **Type-checked JSON.parse.** Proxy classes generated with MakeTypes will parse your JSON and check that it matches the expected type during runtime.
-* **Statically type-check code that interacts with JSON objects.** Proxy objects generated with MakeTypes are expressed as TypeScript classes, so you can statically type check that your code is appropriately accessing fields on the JSON object.
-* **Generate TypeScript interfaces to describe JSON types.** Don't want the overhead of runtime type checking, and trust that your samples are representative? You can opt to generate TypeScript interfaces instead, which describe the expected structure of the JSON object and facilitate type checking.
-
+- **Type-checked JSON.parse.** Proxy classes generated with MakeTypes will parse your JSON and check that it matches the expected type during runtime.
+- **Statically type-check code that interacts with JSON objects.** Proxy objects generated with MakeTypes are expressed as TypeScript classes, so you can statically type check that your code is appropriately accessing fields on the JSON object.
+- **Generate TypeScript interfaces to describe JSON types.** Don't want the overhead of runtime type checking, and trust that your samples are representative? You can opt to generate TypeScript interfaces instead, which describe the expected structure of the JSON object and facilitate type checking.
 
 ## Install
 
@@ -35,9 +39,9 @@ Then, run:
 
 ...where:
 
-* `interfaces.ts` will hold interface definitions for the JSON (optional)
-* `proxies.ts` will hold proxy class definitions that you can use to dynamically type check JSON objects at runtime (optional)
-* `RootName` specifies the name to use for the type that describes the JSON object
+- `interfaces.ts` will hold interface definitions for the JSON (optional)
+- `proxies.ts` will hold proxy class definitions that you can use to dynamically type check JSON objects at runtime (optional)
+- `RootName` specifies the name to use for the type that describes the JSON object
 
 MakeTypes will use simple heuristics to determine the names of nested sub-types.
 
@@ -77,7 +81,7 @@ export class RootNameProxy {
   public static Create(d: any): RootNameProxy {
     if (d === null || d === undefined) {
       throwNull2NonNull("RootName");
-    } else if (typeof(d) !== 'object') {
+    } else if (typeof d !== "object") {
       throwNotObject("RootName");
     } else if (Array.isArray(d)) {
       throwIsArray("RootName");
@@ -99,7 +103,7 @@ export class RootNameProxy {
 Example TypeScript code using proxy class:
 
 ```typescript
-import {RootNameProxy} from './proxies';
+import { RootNameProxy } from "./proxies";
 
 // RootName.Create will throw an exception if rawJson does not match the type of RootName.
 const proxyObject = RootNameProxy.Parse('{"foo": "bar"}');
@@ -148,9 +152,9 @@ export interface RootName {
 Example TypeScript code using interfaces:
 
 ```typescript
-import {RootName} from './interfaces';
+import { RootName } from "./interfaces";
 
-const rawJson = <RootName> JSON.parse('{"foo": "bar"}');
+const rawJson = <RootName>JSON.parse('{"foo": "bar"}');
 let foo = rawJson.foo; // TypeScript knows foo i a string
 let baz = rawJson.baz; // TypeScript knows that baz is an optional field that may not be there.
 ```

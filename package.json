@@ -5,11 +5,13 @@
   "main": "dist/index.js",
   "types": "lib/index",
   "scripts": {
+    "b": "node utils/esbuild.js",
+    "c": "tsc",
     "generate:test": "node ./test/common/generateSamples.js",
     "build:test": "tsc -p test/tsconfig.json"
   },
   "bin": {
-    "make_types": "./index.js"
+    "make_types": "./dist/index.js"
   },
   "repository": {
     "type": "git",
